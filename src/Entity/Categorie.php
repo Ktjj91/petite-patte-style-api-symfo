@@ -14,17 +14,18 @@ class Categorie
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["groups" => "product.read"])]
+    #[Groups(["product.read","comment.read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["groups" => "product.read"])]
+    #[Groups(["product.read","comment.read"])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Product>
      */
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'categorie')]
+    #[Groups(["comment.read"])]
     private Collection $products;
 
     public function __construct()

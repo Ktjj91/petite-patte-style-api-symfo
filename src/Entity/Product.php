@@ -16,11 +16,11 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["groups" => "product.read"])]
+    #[Groups(["product.read","comment.read",'shopping_cart.read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["groups" => "product.read"])]
+    #[Groups(["product.read","comment.read",'shopping_cart.read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
@@ -39,7 +39,7 @@ class Product
     private ?bool $active = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(["groups" => "product.read"])]
+    #[Groups(["product.read","comment.read",'shopping_cart.read'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
@@ -59,7 +59,7 @@ class Product
     private ?User $owner = null;
 
     #[ORM\Column]
-    #[Groups(["groups" => "product.read"])]
+    #[Groups(["product.read"])]
     private ?int $price = null;
 
     public function getId(): ?int
