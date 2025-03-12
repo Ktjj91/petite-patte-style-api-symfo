@@ -43,9 +43,12 @@ class Product
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["product.read","shopping_cart.read"])]
+
     private ?string $stripePriceId = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["product.read","shopping_cart.read"])]
     private ?string $stripeProductId = null;
 
     #[Vich\UploadableField(mapping: "products",fileNameProperty:"imageName",size: "imageSize")]

@@ -3,8 +3,12 @@
 namespace App\Service;
 
 use App\Entity\Product;
+use App\Model\ShoppingCart;
+use App\Model\ShoppingCartItem;
+use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Exception\InvalidArgumentException;
+use Stripe\LineItem;
 use Stripe\Price;
 use Stripe\StripeClient;
 
@@ -68,6 +72,30 @@ class StripeService
         $this->getStripe()->prices->update($priceId, [
             'active' => false
         ]);
+    }
+
+    public function createCheckoutSession(ShoppingCart $shoppingCart) : ?Session
+    {
+        $linesItems = [];
+
+        foreach ($shoppingCart->items as $item ) {
+
+            if(!$item instanceof ShoppingCartItem) {
+                return null;
+            }
+            $linesItems[] = [
+                "price" => $item->product->getStripePriceId(),
+                "quantity" => $item->quantity,
+            ];
+        }
+
+        return $this->getStripe()->checkout->sessions->create([
+            "currency" => "EUR",
+            "line_items" => $linesItems,
+            "mode" => "payment",
+            "success_url" => "http://localhost:8000/stripe/success?=session_id={CHECKOUT_SESSION_ID}",
+        ]);
+
     }
 
 

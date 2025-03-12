@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Product;
 use App\Model\ShoppingCart;
 use App\Model\ShoppingCartItem;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -26,7 +27,7 @@ class SessionService
 
     }
 
-    public function addItemToCart(Product $product): void
+    public function addItemToShoppingCart(Product $product): void
     {
         $shoppingCart = $this->getShoppingCart();
         $existingItem = $this->getExistingShoppingCartItem($product);
@@ -34,8 +35,7 @@ class SessionService
         if ($existingItem) {
             $existingItem->quantity++;
         } else {
-            $shoppingCartItem = new ShoppingCartItem($product, 1);
-            $shoppingCart->addItem($shoppingCartItem);
+            $shoppingCart->items->add(new ShoppingCartItem($product,1));
         }
 
         $this->getSession()->set(self::SHOPPING_CART, $shoppingCart);
@@ -45,35 +45,29 @@ class SessionService
     {
         $shoppingCart = $this->getShoppingCart();
         $existingItem = $this->getExistingShoppingCartItem($product);
-        if(null === $existingItem) {
+
+        if ($existingItem === null) {
             return;
         }
-        if($existingItem->quantity > 1) {
-            $existingItem->quantity--;
-        } else {
-            foreach ($shoppingCart->items as $index => $item) {
-                if($item->product['id'] === $product->getId()) {
-                    unset($shoppingCart->items[$index]);
-                    break;
-                }
-            }
+        $shoppingCart->items->removeElement($existingItem);
+        $newIndexValues = array_values($shoppingCart->items->toArray());
+        $shoppingCart->items = new ArrayCollection($newIndexValues);
 
-            $shoppingCart->items  = array_values($shoppingCart->items);
-        }
         $this->getSession()->set(self::SHOPPING_CART, $shoppingCart);
-
     }
 
-    private function getExistingShoppingCartItem(Product $product) : ?ShoppingCartItem
+    private function getExistingShoppingCartItem(Product $product): ?ShoppingCartItem
     {
-        foreach ($this->getShoppingCart()->items as $item) {
-            if ($item->product['id'] === $product->getId()) {
-                return $item;
-            }
+        $existingItem = $this->getShoppingCart()
+        ->items
+            ->filter(fn(ShoppingCartItem $item) => $item->product->getId() === $product->getId())
+            ->first();
+        ;
+        if($existingItem === false) {
+            return null;
         }
 
-        return null;
-
+        return $existingItem;
     }
 
     private function getSession(): SessionInterface

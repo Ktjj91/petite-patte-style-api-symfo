@@ -2,18 +2,17 @@
 
 namespace App\Model;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 class ShoppingCart
 {
-    #[Groups(['shopping_cart.read'])]
-    public array $items = [];
+public function __construct(
+    #[Groups(["shopping_cart.read"])]
+    public ArrayCollection $items = new ArrayCollection())
+{
 
-    public function addItem(ShoppingCartItem $item): void
-    {
-        $this->items[] = $item;
-    }
-
+}
 
 
 }
